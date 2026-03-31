@@ -1,49 +1,65 @@
+''' HEART DISEASE PREDICTION USING LOGISTIC REGRESSION'''
+
+
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import confusion_matrix, classification_report
+import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
-# Load your CSV
-data = pd.read_csv("clean_heart.csv")
 
-# Features and Target
-X = data.drop("target", axis=1)
-y = data["target"]
 
-# Train-Test Split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+df = pd.read_csv(r"C:\Users\purva kataria\OneDrive\Desktop\niharika\clean_heart.csv")
 
-# Model
-model = LogisticRegression(max_iter=200)
-model.fit(X_train, y_train)
 
-# Prediction
-y_pred = model.predict(X_test)
 
-# Confusion Matrix
-cm = confusion_matrix(y_test, y_pred)
+print("First 5 rows of the dataset:")
+print(df.head())
+
+
+X = df.drop("target", axis=1)   # features
+y = df["target"]                # target (1 = disease, 0 = no disease)
+
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+
+model = LogisticRegression()
+model.fit(X_train_scaled, y_train)
+
+
+y_pred = model.predict(X_test_scaled)
+
+
+print("\nAccuracy:", accuracy_score(y_test, y_pred))
+
 print("\nConfusion Matrix:")
-print(cm)
+print(confusion_matrix(y_test, y_pred))
 
-# Classification Report
 print("\nClassification Report:")
 print(classification_report(y_test, y_pred))
 
-# Plot Confusion Matrix (simple & clear)
+
+cm = confusion_matrix(y_test, y_pred)
+
+plt.figure(figsize=(4, 3))
 plt.imshow(cm, cmap='Blues')
 plt.title("Confusion Matrix")
-plt.xlabel("Predicted Label")
-plt.ylabel("Actual Label")
+plt.colorbar()
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
 
-# Better labels
-plt.xticks([0, 1], ["No Disease", "Disease"])
-plt.yticks([0, 1], ["No Disease", "Disease"])
-
-# Add values inside the squares
 for i in range(2):
     for j in range(2):
         plt.text(j, i, cm[i, j], ha='center', va='center', color='black')
 
-plt.colorbar()
 plt.show()

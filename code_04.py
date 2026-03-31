@@ -1,49 +1,62 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import confusion_matrix, classification_report
 import matplotlib.pyplot as plt
 
-# Load your CSV
-data = pd.read_csv("clean_heart.csv")
+# Load dataset
+data = pd.read_csv("heart_dataset.csv")
 
 # Features and Target
 X = data.drop("target", axis=1)
 y = data["target"]
 
-# Train-Test Split
+# Split Data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Model
-model = LogisticRegression(max_iter=200)
+# Train Model
+model = LogisticRegression(max_iter=300)
 model.fit(X_train, y_train)
 
-# Prediction
-y_pred = model.predict(X_test)
+# -------- USER INPUT SECTION --------
+print("\nEnter Patient Details for Prediction:")
+age = int(input("Age: "))
+sex = int(input("Sex (1=Male, 0=Female): "))
+blood_pressure = int(input("Blood Pressure Value: "))
+heart_rate = int(input("Heart Rate Value: "))
+cholesterol = int(input("Cholesterol Value: "))
 
-# Confusion Matrix
-cm = confusion_matrix(y_test, y_pred)
-print("\nConfusion Matrix:")
-print(cm)
+# Make a dataframe from user input
+user_data = pd.DataFrame({
+    "age": [age],
+    "sex": [sex],
+    "blood_pressure": [blood_pressure],
+    "heart_rate": [heart_rate],
+    "cholesterol": [cholesterol]
+})
 
-# Classification Report
-print("\nClassification Report:")
-print(classification_report(y_test, y_pred))
+# Predict
+prediction = model.predict(user_data)[0]
+probability = model.predict_proba(user_data)[0][1]  # probability of disease
 
-# Plot Confusion Matrix (simple & clear)
-plt.imshow(cm, cmap='Blues')
-plt.title("Confusion Matrix")
-plt.xlabel("Predicted Label")
-plt.ylabel("Actual Label")
+# Print result
+print("\n--- RESULT ---")
+if prediction == 1:
+    print("Heart Disease: YES")
+else:
+    print("Heart Disease: NO")
 
-# Better labels
-plt.xticks([0, 1], ["No Disease", "Disease"])
-plt.yticks([0, 1], ["No Disease", "Disease"])
+print(f"Probability of Heart Disease: {probability:.2f}")
 
-# Add values inside the squares
-for i in range(2):
-    for j in range(2):
-        plt.text(j, i, cm[i, j], ha='center', va='center', color='black')
+# -------- LINE CHART OUTPUT --------
 
-plt.colorbar()
+# Data for line chart
+labels = ["Age", "BP", "Heart Rate", "Cholesterol"]
+values = [age, blood_pressure, heart_rate, cholesterol]
+
+plt.plot(labels, values, marker='o')
+plt.title("Patient Health Parameters")
+plt.xlabel("Parameters")
+plt.ylabel("Values")
+plt.grid(True)
+
 plt.show()
